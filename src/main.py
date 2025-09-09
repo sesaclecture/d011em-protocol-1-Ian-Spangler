@@ -25,8 +25,13 @@ def blink_led() -> None:
     - 종료시 LED는 OFF 상태
     """
     # TODO: blink_led 구현
-
-    raise NotImplementedError
+    count = 0
+    led = LED(18)
+    while count < 10:
+        led.on()
+        time.sleep(1)
+        led.off()
+        count += 1
 
 
 def check_to_input_button() -> None:
@@ -39,8 +44,20 @@ def check_to_input_button() -> None:
     - 버튼 입력을 10번 받았으면 종료.
     """
     # TODO: check_to_input_button 구현
+    count = 0
+    btn = Button(18, pull_up = True)
+    prev = btn.is_pressed
+    while count < 10:
+        cur = btn.is_pressed
+        if cur != prev:
+            if cur:
+                print("pressed")
+                count += 1
+            else:
+                print("released")
+            prev = cur
 
-    raise NotImplementedError
+        time.sleep(0.1)
 
 
 def blink_led_through_button() -> None:
@@ -53,10 +70,16 @@ def blink_led_through_button() -> None:
     - 종료시 LED는 OFF 상태
     """
     # TODO: blink_led_through_button 구현
+    count = 0
     led = LED(12)
-    led.on()
-
-    raise NotImplementedError
+    btn = Button(13, pull_up = True)
+    while count < 10:
+        if btn.is_pressed:
+            led.on()
+            time.sleep(0.5)
+            led.off()
+            time.sleep(0.5)
+            count += 1
 
 
 def transmit_msg() -> None:
@@ -65,9 +88,14 @@ def transmit_msg() -> None:
     - 총 10번 전송 후 종료
     - 개행을 붙여 전송 (수신/테스트 편의)
     """
-    # TODO: blink_led_through_button 구현
-
-    raise NotImplementedError
+    # TODO: transmit_msg 구현
+    count = 0
+    ser = Serial("/dev/ttyAMA3", baudrate=115200, timeout=1.0)
+    while count < 10:
+        msg = f"Hello World! {count}\n"
+        ser.write(msg.encode())
+        count += 1
+        time.sleep(1)
 
 
 def receive_msg() -> None:
@@ -75,10 +103,23 @@ def receive_msg() -> None:
     [문제 2] UART3에서 줄 단위로 읽어 화면에 출력.
     - 'exit' (대소문자 무시) 라인을 수신하면 함수 종료
     """
-    # TODO: blink_led_through_button 구현
-
-    raise NotImplementedError
-
+    # TODO: receive_msg 구현
+    buffer = ""
+    ser = Serial("/dev/ttyAMA3", baudrate=115200, timeout=1.0)
+    while True:
+        char = ser.read()
+        if char:
+            decoded_char = char.decode(errors="ignore")
+            if decoded_char == "\n":  # end of line
+                line = buffer.strip()
+                print(line)
+                buffer = ""
+                if line.lower() == 'exit':
+                    break
+            else:
+                buffer += decoded_char
+        else:
+            break
 
 if __name__ == "__main__":
     blink_led()
